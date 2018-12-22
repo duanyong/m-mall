@@ -9,50 +9,55 @@ Page({
         }
     },
     onLoad(option) {
-        console.log(option)
+        console.debug(option);
+
         this.setData({
             address_id: option.id
-        })
+        });
 
         const carts = {
             items: App.WxService.getStorageSync('confirmOrder'), 
             totalAmount: 0, 
-        }
+        };
 
         carts.items.forEach(n => carts.totalAmount+=n.totalAmount)
         
         this.setData({
             carts: carts
-        })
+        });
 
-        console.log(this.data.carts)
+        console.debug(this.data.carts);
     },
     onShow() {
-        const address_id = this.data.address_id
+        const address_id = this.data.address_id;
+
         if (address_id) {
-            this.getAddressDetail(address_id)
+            this.getAddressDetail(address_id);
         } else {
-            this.getDefalutAddress()
+            this.getDefalutAddress();
         }
     },
     redirectTo(e) {
-        console.log(e)
+        console.debug(e);
+
         App.WxService.redirectTo('/pages/address/confirm/index', {
             ret: this.data.address_id
-        })
+        });
     },
     getDefalutAddress() {
         App.HttpService.getDefalutAddress()
         .then(res => {
-            const data = res.data
-            console.log(data)
+            console.debug(res);
+
+            const data = res.data;
+
             if (data.meta.code == 0) {
                 this.setData({
-                    address_id: data.data._id, 
-                    'address.item': data.data, 
-                })
+                    address_id      : data.data._id,
+                    'address.item'  : data.data,
+                });
             } else {
-                this.showModal()
+                this.showModal();
             }
         })
     },
@@ -62,19 +67,21 @@ Page({
             content: '没有收货地址，请先设置', 
         })
         .then(data => {
-            console.log(data)
+            console.debug(data);
+
             if (data.confirm == 1) {
-                App.WxService.redirectTo('/pages/address/add/index')
+                App.WxService.redirectTo('/pages/address/add/index');
             } else {
-                App.WxService.navigateBack()
+                App.WxService.navigateBack();
             }
         })
     },
     getAddressDetail(id) {
         App.HttpService.getAddressDetail(id)
         .then(res => {
-            const data = res.data
-            console.log(data)
+            console.debug(res);
+
+            const data = res.data;
             if (data.meta.code == 0) {
                 this.setData({
                     'address.item': data.data
@@ -83,34 +90,38 @@ Page({
         })
     },
     addOrder() {
-        const address_id = this.data.address_id
+        const address_id = this.data.address_id;
         const params = {
             items: [], 
             address_id: address_id, 
-        }
+        };
+
         this.data.carts.items.forEach(n => {
             params.items.push({
                 id: n.goods._id,
                 total: n.total,
             })
-        })
-        console.log(params)
+        });
+
+        console.log(params);
         App.HttpService.postOrder(params)
         .then(res => {
-            const data = res.data
-            console.log(data)
+            const data = res.data;
+            console.debug(data);
+
             if (data.meta.code == 0) {
                 App.WxService.redirectTo('/pages/order/detail/index', {
                     id: data.data._id
-                })
+                });
             }
         })
     },
     clear() {
         App.HttpService.clearCartByUser()
         .then(res => {
-            const data = res.data
-            console.log(data)
-        })
+            const data = res.data;
+
+            console.debug(data);
+        });
     },
-})
+});

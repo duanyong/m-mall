@@ -7,7 +7,7 @@ class InterceptorManager {
     }
 
     __init() {
-        this.handlers = []
+        this.handlers = [];
     }
 
     /**
@@ -19,8 +19,9 @@ class InterceptorManager {
             requestError: obj.requestError,
             response: obj.response,
             responseError: obj.responseError,
-        })
-        return this.handlers.length - 1
+        });
+
+        return this.handlers.length - 1;
     }
 
     /**
@@ -28,7 +29,7 @@ class InterceptorManager {
      */
     eject(id) {
         if (this.handlers[id]) {
-            this.handlers[id] = null
+            this.handlers[id] = null;
         }
     }
 
@@ -38,7 +39,7 @@ class InterceptorManager {
     forEach(fn) {
         this.handlers.forEach(h => {
             if (h !== null) {
-                fn(h)
+                fn(h);
             }
         })
     }

@@ -17,17 +17,18 @@ class WxRequest {
     constructor(defaults) {
         Object.assign(this, {
             defaults,
-        })
-        this.__init()
+        });
+
+        this.__init();
     }
 
     /**
      * 初始化
      */
     __init() {
-        this.__initInterceptor()
-        this.__initDefaults()
-        this.__initMethods()
+        this.__initInterceptor();
+        this.__initDefaults();
+        this.__initMethods();
     }
 
     /**
@@ -37,18 +38,22 @@ class WxRequest {
         this.interceptors = new InterceptorManager
         this.interceptors.use({
             request(request) {
-                request.requestTimestamp = new Date().getTime()
+                request.requestTimestamp = new Date().getTime();
+
                 return request
             },
+
             requestError(requestError) {
-                return Promise.reject(requestError)
+                return Promise.reject(requestError);
             },
+
             response(response) {
-                response.responseTimestamp = new Date().getTime()
-                return response
+                response.responseTimestamp = new Date().getTime();
+                return response;
             },
+
             responseError(responseError) {
-                return Promise.reject(responseError)
+                return Promise.reject(responseError);
             },
         })
     }
@@ -64,15 +69,17 @@ class WxRequest {
             baseURL: '',
             // 请求头
             header: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept'        : 'application/json, text/plain, */*',
+                'Content-Type'  : 'application/x-www-form-urlencoded',
             },
+
             // 转换请求数据
             transformRequest: [
                 (data, header) => {
                     return data
                 },
             ],
+
             // 转换响应数据
             transformResponse: [
                 (data, header) => {
@@ -81,15 +88,17 @@ class WxRequest {
                             data = JSON.parse(data)
                         } catch (e) { /* Ignore */ }
                     }
-                    return data
+
+                    return data;
                 },
             ],
+
             // 基于响应状态返回成功或失败
             validateStatus: status => status >= 200 && status < 300,
         }
 
         // 合并参数
-        this.defaults = Object.assign({}, defaults, this.defaults)
+        this.defaults = Object.assign({}, defaults, this.defaults);
     }
 
     /**
@@ -97,7 +106,7 @@ class WxRequest {
      */
     __initMethods() {
         // 方法名后缀字符串
-        const suffix = this.defaults.suffix
+        const suffix = this.defaults.suffix;
 
         // 发起请求所支持的方法
         const instanceSource = {
@@ -111,7 +120,7 @@ class WxRequest {
                 'TRACE',
                 'CONNECT',
             ],
-        }
+        };
 
         // 遍历对象构造方法
         for (let key in instanceSource) {
@@ -120,16 +129,16 @@ class WxRequest {
                     return this.__defaultRequest(Object.assign({}, config, {
                         method,
                         url,
-                    }))
+                    }));
                 }
             })
         }
 
         // request - 基础请求方法
-        this.request = (...args) => this.__defaultRequest(...args)
+        this.request = (...args) => this.__defaultRequest(...args);
 
         // Promise.all - 合并处理请求
-        this.all = promises => Promise.all(promises)
+        this.all = promises => Promise.all(promises);
     }
 
     /**
@@ -147,16 +156,16 @@ class WxRequest {
         if (typeof config === 'string') {
             config = Object.assign({}, {
                 url: arguments[1]
-            }, arguments[2])
+            }, arguments[2]);
         }
 
         // 合并参数
         const defaults = Object.assign({
             method: 'GET',
             dataType: 'json',
-        }, this.defaults, config)
+        }, this.defaults, config);
 
-        const { baseURL, header, validateStatus } = defaults
+        const { baseURL, header, validateStatus } = defaults;
 
         // 配置请求参数
         const $$config = {
@@ -165,76 +174,82 @@ class WxRequest {
             header: defaults.header,
             method: defaults.method,
             dataType: defaults.dataType,
-        }
+        };
 
         // 配置请求路径 prefix
         if (this.$$prefix && !Utils.isAbsoluteURL($$config.url)) {
-            $$config.url = Utils.combineURLs(this.$$prefix, $$config.url)
+            $$config.url = Utils.combineURLs(this.$$prefix, $$config.url);
         }
 
         // 配置请求路径 baseURL
         if (baseURL && !Utils.isAbsoluteURL($$config.url)) {
-            $$config.url = Utils.combineURLs(baseURL, $$config.url)
+            $$config.url = Utils.combineURLs(baseURL, $$config.url);
         }
 
         // 注入拦截器
         const chainInterceptors = (promise, interceptors) => {
             for (let i = 0, ii = interceptors.length; i < ii;) {
-                let thenFn = interceptors[i++]
-                let rejectFn = interceptors[i++]
-                promise = promise.then(thenFn, rejectFn)
+                let thenFn   = interceptors[i++];
+                let rejectFn = interceptors[i++];
+
+                promise = promise.then(thenFn, rejectFn);
             }
-            return promise
-        }
+
+            return promise;
+        };
 
         // 转换数据
         const transformData = (data, header, status, fns) => {
             fns.forEach(fn => {
-                data = fn(data, header, status)
-            })
-            return data
-        }
+                data = fn(data, header, status);
+            });
+
+            return data;
+        };
 
         // 转换响应数据
         const transformResponse = res => {
             const __res = Object.assign({}, res, {
                 data: transformData(res.data, res.header, res.statusCode, defaults.transformResponse),
-            })
-            return validateStatus(res.statusCode) ? __res : Promise.reject(__res)
-        }
+            });
+
+            return validateStatus(res.statusCode) ? __res : Promise.reject(__res);
+        };
 
         // 发起HTTPS请求
         const serverRequest = config => {
             const __config = Object.assign({}, config, {
                 data: transformData($$config.data, $$config.header, undefined, defaults.transformRequest),
-            })
-            return this.__http(__config).then(transformResponse, transformResponse)
-        }
+            });
 
-        let requestInterceptors = []
-        let responseInterceptors = []
-        let promise = Promise.resolve($$config)
+            return this.__http(__config).then(transformResponse, transformResponse);
+        };
+
+        let requestInterceptors     = [];
+        let responseInterceptors    = [];
+        let promise                 = Promise.resolve($$config);
 
         // 缓存拦截器
         this.interceptors.forEach(n => {
             if (n.request || n.requestError) {
-                requestInterceptors.push(n.request, n.requestError)
+                requestInterceptors.push(n.request, n.requestError);
             }
+
             if (n.response || n.responseError) {
-                responseInterceptors.unshift(n.response, n.responseError)
+                responseInterceptors.unshift(n.response, n.responseError);
             }
-        })
+        });
 
         // 注入请求拦截器
-        promise = chainInterceptors(promise, requestInterceptors)
+        promise = chainInterceptors(promise, requestInterceptors);
 
         // 发起HTTPS请求
-        promise = promise.then(serverRequest)
+        promise = promise.then(serverRequest);
 
         // 注入响应拦截器
-        promise = chainInterceptors(promise, responseInterceptors)
+        promise = chainInterceptors(promise, responseInterceptors);
 
-        return promise
+        return promise;
     }
 
     /**
@@ -242,9 +257,10 @@ class WxRequest {
      */
     __http(obj) {
         return new Promise((resolve, reject) => {
-            obj.success = (res) => resolve(res)
-            obj.fail = (res) => reject(res)
-            wx.request(obj)
+            obj.success = (res) => resolve(res);
+            obj.fail    = (res) => reject(res);
+
+            wx.request(obj);
         })
     }
 }

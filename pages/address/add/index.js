@@ -1,4 +1,4 @@
-const App = getApp()
+const App = getApp();
 
 Page({
     data: {
@@ -48,43 +48,49 @@ Page({
 			address: {
 				required: '请输入收货人地址', 
 			},
-		})
+		});
 
-        this.address = App.HttpResource('/address/:id', {id: '@id'})
+        this.address = App.HttpResource('/address/:id', {id: '@id'});
     },
 	radioChange(e) {		 
-		console.log('radio发生change事件，携带value值为：', e.detail.value)
-		const params = e.detail.value
-		const value = e.detail.value
-		const radio = this.data.radio
-		radio.forEach(n => n.checked = n.value === value)
+		console.debug('radio发生change事件，携带value值为：', e.detail.value);
+
+		const params = e.detail.value;
+		const value  = e.detail.value;
+		const radio  = this.data.radio;
+
+		radio.forEach(n => n.checked = n.value === value);
+
 		this.setData({
 			radio: radio, 
 			'form.gender': value, 
-		})
+		});
 	},
 	submitForm(e) {
-		const params = e.detail.value
+		const params = e.detail.value;
 
-		console.log(params)
+		console.debug(params);
 
 		if (!this.WxValidate.checkForm(e)) {
-			const error = this.WxValidate.errorList[0]
+			const error = this.WxValidate.errorList[0];
+
 			App.WxService.showModal({
 				title: '友情提示', 
 					content: `${error.param} : ${error.msg}`, 
 					showCancel: !1, 
-			})
-			return false
+			});
+
+			return false;
 		}
 
 		// App.HttpService.postAddress(params)
 		this.address.saveAsync(params)
 		.then(res => {
-            const data = res.data
-            console.log(data)
+            const data = res.data;
+            console.debug(data);
+
 			if (data.meta.code == 0) {
-				this.showToast(data.meta.message)
+				this.showToast(data.meta.message);
 			}
 		})
 	},
@@ -94,15 +100,15 @@ Page({
 			icon    : 'success', 
 			duration: 1500, 
 		})
-		.then(() => App.WxService.navigateBack())
+		.then(() => App.WxService.navigateBack());
 	},
 	chooseLocation() {
 		App.WxService.chooseLocation()
 	    .then(data => {
-	        console.log(data)
+	        console.debug(data);
 	        this.setData({
 	        	'form.address': data.address
 	        })
-	    })
+	    });
 	},
-})
+});

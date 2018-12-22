@@ -1,3 +1,3 @@
-import WxResource from './core/WxResource'
+import WxResource from './core/WxResource';
 
 export default WxResource

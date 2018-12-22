@@ -21,29 +21,30 @@ class WxService {
     __initTools() {
         this.tools = {
             isArray(value) {
-                return Array.isArray(value)
+                return Array.isArray(value);
             },
             isObject(value) {
-                return value !== null && typeof value === 'object'
+                return value !== null && typeof value === 'object';
             },
             isNumber(value) {
-                return typeof value === 'number'
+                return typeof value === 'number';
             },
             isDate(value) {
-                return Object.prototype.toString.call(value) === '[object Date]'
+                return Object.prototype.toString.call(value) === '[object Date]';
             },
             isUndefined(value) {
-                return typeof value === 'undefined'
+                return typeof value === 'undefined';
             },
             toJson(obj, pretty) {
-                if (this.isUndefined(obj)) return undefined
+                if (this.isUndefined(obj)) return undefined;
                 if (!this.isNumber(pretty)) {
-                    pretty = pretty ? 2 : null
+                    pretty = pretty ? 2 : null;
                 }
-                return JSON.stringify(obj, null, pretty)
+
+                return JSON.stringify(obj, null, pretty);
             },
             serializeValue(value) {
-                if (this.isObject(value)) return this.isDate(value) ? value.toISOString() : this.toJson(value)
+                if (this.isObject(value)) return this.isDate(value) ? value.toISOString() : this.toJson(value);
                 return value
             },
             encodeUriQuery(value, pctEncodeSpaces) {
@@ -53,14 +54,17 @@ class WxService {
                     .replace(/%24/g, '$')
                     .replace(/%2C/gi, ',')
                     .replace(/%3B/gi, ';')
-                    .replace(/%20/g, (pctEncodeSpaces ? '%20' : '+'))
+                    .replace(/%20/g, (pctEncodeSpaces ? '%20' : '+'));
             },
             paramSerializer(obj) {
-                if (!obj) return ''
-                let parts = []
+                if (!obj) return '';
+
+                let parts = [];
+
                 for (let key in obj) {
-                    const value = obj[key]
-                    if (value === null || this.isUndefined(value)) return
+                    const value = obj[key];
+
+                    if (value === null || this.isUndefined(value)) return;
                     if (this.isArray(value)) {
                         value.forEach((v) => {
                             parts.push(this.encodeUriQuery(key) + '=' + this.encodeUriQuery(this.serializeValue(v)))
@@ -69,14 +73,17 @@ class WxService {
                         parts.push(this.encodeUriQuery(key) + '=' + this.encodeUriQuery(this.serializeValue(value)))
                     }
                 }
-                return parts.join('&')
+
+                return parts.join('&');
             },
             buildUrl(url, obj) {
-                const serializedParams = this.paramSerializer(obj)
+                const serializedParams = this.paramSerializer(obj);
+
                 if (serializedParams.length > 0) {
                     url += ((url.indexOf('?') == -1) ? '?' : '&') + serializedParams
                 }
-                return url
+
+                return url;
             },
         }
     }
@@ -117,6 +124,7 @@ class WxService {
                     if (this.noPromiseMethods.indexOf(method) !== -1 || method.substr(0, 2) === 'on' || /\w+Sync$/.test(method)) {
                         return wx[method](...args)
                     }
+
                     return this.__defaultRequest(method, ...args)
                 }
             })
@@ -139,11 +147,13 @@ class WxService {
             this[method] = (url, params) => {
                 const obj = {
                     url,
-                }
+                };
+
                 if (method !== 'switchTab') {
                     obj.url = this.tools.buildUrl(url, params)
                 }
-                return this.__defaultRequest(method, obj)
+
+                return this.__defaultRequest(method, obj);
             }
         })
 
@@ -165,9 +175,10 @@ class WxService {
      */
     __defaultRequest(method = '', obj = {}) {
         return new Promise((resolve, reject) => {
-            obj.success = (res) => resolve(res)
-            obj.fail = (res) => reject(res)
-            wx[method](obj)
+            obj.success = (res) => resolve(res);
+            obj.fail    = (res) => reject(res);
+
+            wx[method](obj);
         })
     }
 }
